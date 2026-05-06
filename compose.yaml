@@ -1,5 +1,35 @@
 services:
+
+  db:
+    image: postgres:15-slim
+    container_name: frotis_db
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app_network
+
   backend:
     build: ./backend
+    container_name: frotis_backend
+    restart: always
+    env_file: .env
+    depends_on:
+      - db
     ports:
       - "8000:8000"
+    networks:
+      - app_network
+
+volumes:
+  postgres_data:
+
+networks:
+  app_network:
+    driver: bridge
