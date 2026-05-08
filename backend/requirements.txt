@@ -1,11 +1,12 @@
 fastapi
-uvicorn
+uvicorn[standard]
 psycopg2-binary
-sqlalchemy
-alembic
-python-jose[cryptography] 
+sqlalchemy>=2.0
+alembic>=1.13
+python-dotenv
+python-jose[cryptography]
 passlib[bcrypt]
-opencv-python-headless 
+opencv-python-headless
 python-multipart
 torch
 torchvision

@@ -1,0 +1,21 @@
+Generic single-database configuration.
+
+Siempre desde backend/
+
+# 1. GENERAR una nueva migración (detecta cambios en los modelos automáticamente)
+python -m alembic revision --autogenerate -m "descripcion del cambio"
+
+# 2. APLICAR todas las migraciones pendientes
+python -m alembic upgrade head
+
+# 3. VER el estado actual (qué revisión está aplicada)
+python -m alembic current
+
+# 4. VER el historial de migraciones
+python -m alembic history
+
+# 5. REVERTIR la última migración aplicada
+python -m alembic downgrade -1
+
+# 6. REVERTIR TODAS las migraciones (base de datos vacía)
+python -m alembic downgrade base
