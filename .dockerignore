@@ -1,0 +1,18 @@
+__pycache__/
+*.pyc
+*.pyo
+*.log
+Frotis-App.code-workspace
+
+# Entorno virtual
+.venv/
+venv/
+env/
+
+# pytest
+.pytest_cache/
+.coverage
+
+# IDEs
+.vscode/
+.idea/

@@ -1,4 +1,19 @@
-__pycache__
+__pycache__/
+*.pyc
+*.pyo
 *.env
 *.log
 Frotis-App.code-workspace
+
+# Entorno virtual
+.venv/
+venv/
+env/
+
+# pytest
+.pytest_cache/
+.coverage
+
+# IDEs
+.vscode/
+.idea/

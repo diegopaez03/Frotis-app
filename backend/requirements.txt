@@ -6,6 +6,7 @@ alembic>=1.13
 python-dotenv
 python-jose[cryptography]
 passlib[bcrypt]
+email-validator
 opencv-python-headless
 python-multipart
 torch
@@ -15,3 +16,8 @@ Pillow
 matplotlib
 pandas
 numpy
+
+# --- Testing ---
+pytest
+httpx
+pytest-asyncio
