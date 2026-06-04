@@ -10,6 +10,7 @@ de la API para la documentación automática (OpenAPI / Swagger UI).
 from fastapi import FastAPI
 
 from app.api.routes.auth import router as auth_router
+from app.api.routes.predict import router as predict_router
 
 # ---------------------------------------------------------------------------
 # Instancia principal de la aplicación FastAPI
@@ -42,4 +43,8 @@ async def root() -> dict:
 # ---------------------------------------------------------------------------
 
 # Router de autenticación: /auth/register, /auth/login, /users/me
-app.include_router(auth_router)
+app.include_router(auth_router)
+
+# Router de predicción: /predict (detección y clasificación de leucocitos)
+app.include_router(predict_router)
+

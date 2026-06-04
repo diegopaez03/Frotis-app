@@ -16,4 +16,6 @@ env/
 
 # IDEs
 .vscode/
-.idea/
+.idea/
+
+context/
