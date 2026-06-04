@@ -10,6 +10,11 @@ de la API para la documentación automática (OpenAPI / Swagger UI).
 from fastapi import FastAPI
 
 from app.api.routes.auth import router as auth_router
+from app.api.routes.analyze import router as analyze_router
+from app.core.config import settings
+
+import cloudinary
+import cloudinary.uploader
 from app.api.routes.predict import router as predict_router
 
 # ---------------------------------------------------------------------------
@@ -28,6 +33,14 @@ app = FastAPI(
 )
 
 
+#  Cloudinary Configuration — lee credenciales desde variables de entorno (.env)
+cloudinary.config(
+    cloud_name=settings.CLOUDINARY_CLOUD_NAME,
+    api_key=settings.CLOUDINARY_API_KEY,
+    api_secret=settings.CLOUDINARY_API_SECRET,
+    secure=True,
+)
+
 # ---------------------------------------------------------------------------
 # Health check — endpoint raíz para verificar que la API está activa
 # ---------------------------------------------------------------------------
@@ -44,7 +57,3 @@ async def root() -> dict:
 
 # Router de autenticación: /auth/register, /auth/login, /users/me
 app.include_router(auth_router)
-
-# Router de predicción: /predict (detección y clasificación de leucocitos)
-app.include_router(predict_router)
-

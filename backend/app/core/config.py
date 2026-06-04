@@ -7,10 +7,23 @@ Lee variables de entorno o valores por defecto para:
 - SECRET_KEY: clave secreta para firmar JWTs (CRÍTICO: cambiar en producción)
 - ALGORITHM: algoritmo de firma JWT (HS256 por defecto)
 - ACCESS_TOKEN_EXPIRE_MINUTES: tiempo de vida del token
+- CLOUDINARY_CLOUD_NAME / CLOUDINARY_API_KEY / CLOUDINARY_API_SECRET: credenciales Cloudinary
 """
 
 import os
 from functools import lru_cache
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+# ---------------------------------------------------------------------------
+# Carga explícita del archivo .env
+# ---------------------------------------------------------------------------
+# El .env vive en la raíz del proyecto (un nivel arriba de /backend).
+# Se calcula la ruta de forma absoluta para que funcione sin importar desde
+# dónde se ejecute uvicorn.
+_ENV_FILE: Path = Path(__file__).resolve().parents[3] / ".env"
+load_dotenv(_ENV_FILE)
 
 
 class Settings:
@@ -36,6 +49,18 @@ class Settings:
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
         os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")
     )
+
+    # ---------------------------------------------------------------------------
+    # Cloudinary — Almacenamiento de imágenes en la nube
+    # ---------------------------------------------------------------------------
+    # Nombre del cloud de Cloudinary (visible en el dashboard).
+    CLOUDINARY_CLOUD_NAME: str = os.getenv("CLOUDINARY_CLOUD_NAME", "")
+
+    # API Key pública de Cloudinary.
+    CLOUDINARY_API_KEY: str = os.getenv("CLOUDINARY_API_KEY", "")
+
+    # API Secret de Cloudinary (NUNCA exponer en el cliente).
+    CLOUDINARY_API_SECRET: str = os.getenv("CLOUDINARY_API_SECRET", "")
 
 
 @lru_cache()

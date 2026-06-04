@@ -1,23 +1,33 @@
+# --- Backend API y base de datos ---
 fastapi
-uvicorn[standard]
-psycopg2-binary
 sqlalchemy>=2.0
 alembic>=1.13
-python-dotenv
-python-jose[cryptography]
-passlib[bcrypt]
-email-validator
-opencv-python-headless
+uvicorn[standard]
+
+# --- Otros ---
+psycopg2-binary
+pydantic[email]
 python-multipart
-torch
-torchvision
-ultralytics
 Pillow
+
+# --- Machine Learning ---
 matplotlib
 pandas
 numpy
 
+# --- DeepLearning y CV ---
+torch
+torchvision
+ultralytics
+opencv-python-headless
+
 # --- Testing ---
 pytest
 httpx
-pytest-asyncio
+pytest-asyncio
+
+# --- Utilidades ---
+cloudinary
+python-dotenv
+python-jose[cryptography]
+passlib[bcrypt]
