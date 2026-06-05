@@ -1,0 +1,241 @@
+/* =========================================================
+   globals.css — Base styles & CSS Reset
+   Frotis AI · Modern Earth Design System
+   ========================================================= */
+
+/* Box sizing reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Root & Body */
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-body-md);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-normal);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Root container fills viewport */
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Typography ------------------------------------------- */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  color: var(--color-text);
+  letter-spacing: var(--ls-tight);
+}
+
+h1 { font-size: var(--text-headline-h1); }
+h2 { font-size: var(--text-headline-h2); }
+h3 { font-size: var(--text-headline-h3); }
+h4 { font-size: var(--text-title-lg); font-family: var(--font-sans); font-weight: var(--fw-semibold); }
+h5 { font-size: var(--text-body-lg); font-family: var(--font-sans); font-weight: var(--fw-semibold); }
+h6 { font-size: var(--text-body-md); font-family: var(--font-sans); font-weight: var(--fw-semibold); }
+
+p { line-height: var(--lh-relaxed); }
+p + p { margin-top: var(--space-4); }
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+a:hover { color: var(--color-primary-dark); text-decoration: underline; }
+
+strong { font-weight: var(--fw-semibold); }
+
+/* --- Lists ----------------------------------------------- */
+ul, ol { list-style: none; }
+
+/* --- Media ----------------------------------------------- */
+img, video {
+  display: block;
+  max-width: 100%;
+}
+
+/* --- Forms ----------------------------------------------- */
+input, textarea, select, button {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+button { cursor: pointer; border: none; background: none; }
+input, textarea { outline: none; }
+
+/* --- Scrollbar ------------------------------------------- */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--color-bg-subtle); }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-primary-container); }
+
+/* --- Focus Visible --------------------------------------- */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* --- Selection ------------------------------------------- */
+::selection {
+  background-color: var(--color-primary-tint);
+  color: var(--color-primary-dark);
+}
+
+/* --- Utility Classes ------------------------------------- */
+
+/* Layout */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-1 { flex: 1; }
+.items-center { align-items: center; }
+.items-start { align-items: flex-start; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.gap-1 { gap: var(--space-1); }
+.gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
+.gap-4 { gap: var(--space-4); }
+.gap-6 { gap: var(--space-6); }
+.gap-8 { gap: var(--space-8); }
+
+/* Spacing */
+.p-4 { padding: var(--space-4); }
+.p-6 { padding: var(--space-6); }
+.mt-2 { margin-top: var(--space-2); }
+.mt-4 { margin-top: var(--space-4); }
+.mt-6 { margin-top: var(--space-6); }
+.mb-2 { margin-bottom: var(--space-2); }
+.mb-4 { margin-bottom: var(--space-4); }
+.mb-6 { margin-bottom: var(--space-6); }
+.ml-auto { margin-left: auto; }
+
+/* Typography utilities */
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-muted { color: var(--color-text-muted); }
+.text-secondary { color: var(--color-text-secondary); }
+.text-primary { color: var(--color-primary); }
+.text-tertiary { color: var(--color-tertiary); }
+.font-serif { font-family: var(--font-serif); }
+.font-semibold { font-weight: var(--fw-semibold); }
+.font-bold { font-weight: var(--fw-bold); }
+.text-sm { font-size: var(--text-label-md); }
+.text-xs { font-size: var(--text-caption); }
+.text-lg { font-size: var(--text-title-lg); }
+.uppercase { text-transform: uppercase; letter-spacing: var(--ls-widest); }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Visibility */
+.hidden { display: none !important; }
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Width */
+.w-full { width: 100%; }
+
+/* Misc */
+.rounded { border-radius: var(--radius); }
+.overflow-hidden { overflow: hidden; }
+
+/* --- Animations ------------------------------------------ */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(157,67,0,0.3); }
+  50%       { box-shadow: 0 0 0 8px rgba(157,67,0,0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes bounceIn {
+  0%   { transform: scale(0.85); opacity: 0; }
+  60%  { transform: scale(1.04); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+.animate-fade-in      { animation: fadeIn 0.35s ease both; }
+.animate-fade-in-up   { animation: fadeInUp 0.45s ease both; }
+.animate-fade-in-scale{ animation: fadeInScale 0.3s ease both; }
+.animate-bounce-in    { animation: bounceIn 0.4s ease both; }
+
+/* Stagger children */
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 60ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 120ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 180ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 240ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 300ms; }
+
+/* Skeleton / Loading shimmer */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-border-subtle) 0px,
+    var(--color-surface) 40%,
+    var(--color-border-subtle) 80%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 1.8s infinite linear;
+  border-radius: var(--radius);
+}
+
+/* Divider */
+.divider {
+  width: 100%;
+  height: 1px;
+  background: var(--color-divider);
+  margin: var(--space-6) 0;
+}

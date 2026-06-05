@@ -1,0 +1,160 @@
+/* =========================================================
+   design-tokens.css — Modern Earth Design System
+   Frotis AI · Color Palette, Typography & Spacing Tokens
+   ========================================================= */
+
+:root {
+  /* --- Color Palette --------------------------------------- */
+  /* Background */
+  --color-bg:            #fff8f6;
+  --color-bg-subtle:     #fdf2ee;
+  --color-surface:       #ffffff;
+  --color-surface-raised:#fffbfa;
+
+  /* Primary — Naranja profundo */
+  --color-primary:       #9d4300;
+  --color-primary-dark:  #7a3300;
+  --color-primary-light: #c55400;
+  --color-primary-container: #f37421;
+  --color-primary-tint:  #fde8d6;
+  --color-on-primary:    #ffffff;
+
+  /* Secondary — Verde oliva */
+  --color-secondary:     #54643c;
+  --color-secondary-dark:#3d4a2b;
+  --color-secondary-light:#6d8050;
+  --color-secondary-container: #d4e6b4;
+  --color-secondary-tint:#edf5da;
+  --color-on-secondary:  #ffffff;
+
+  /* Tertiary — Teal */
+  --color-tertiary:      #006a60;
+  --color-tertiary-dark: #004d45;
+  --color-tertiary-light:#17ab9c;
+  --color-tertiary-container: #17ab9c;
+  --color-tertiary-tint: #d4f0ed;
+  --color-on-tertiary:   #ffffff;
+
+  /* Text */
+  --color-text:          #251913;
+  --color-text-secondary:#5c3a2a;
+  --color-text-muted:    #7a5c50;
+  --color-text-inverse:  #ffffff;
+
+  /* Border & Dividers */
+  --color-border:        #e8d5cc;
+  --color-border-subtle: #f0e0d8;
+  --color-divider:       #ede0da;
+
+  /* Semantic */
+  --color-error:         #ba1a1a;
+  --color-error-tint:    #ffdad6;
+  --color-warning:       #7b5800;
+  --color-warning-tint:  #ffefc0;
+  --color-success:       #006e2c;
+  --color-success-tint:  #c9ffe0;
+
+  /* Overlay */
+  --color-overlay:       rgba(37, 25, 19, 0.55);
+  --color-overlay-light: rgba(37, 25, 19, 0.12);
+
+  /* --- Typography ----------------------------------------- */
+  --font-serif:   'Playfair Display', Georgia, serif;
+  --font-sans:    'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Font Sizes */
+  --text-display-lg:  3rem;        /* 48px */
+  --text-display-md:  2.5rem;      /* 40px */
+  --text-headline-h1: 2rem;        /* 32px */
+  --text-headline-h2: 1.5rem;      /* 24px */
+  --text-headline-h3: 1.25rem;     /* 20px */
+  --text-title-lg:    1.125rem;    /* 18px */
+  --text-body-lg:     1.0625rem;   /* 17px */
+  --text-body-md:     1rem;        /* 16px */
+  --text-body-sm:     0.9375rem;   /* 15px */
+  --text-label-lg:    0.9375rem;   /* 15px */
+  --text-label-md:    0.875rem;    /* 14px */
+  --text-label-sm:    0.8125rem;   /* 13px */
+  --text-caption:     0.75rem;     /* 12px */
+
+  /* Font Weights */
+  --fw-light:   300;
+  --fw-regular: 400;
+  --fw-medium:  500;
+  --fw-semibold:600;
+  --fw-bold:    700;
+
+  /* Line Heights */
+  --lh-tight:   1.2;
+  --lh-snug:    1.35;
+  --lh-normal:  1.5;
+  --lh-relaxed: 1.65;
+
+  /* Letter Spacing */
+  --ls-tight:   -0.02em;
+  --ls-normal:  0;
+  --ls-wide:    0.025em;
+  --ls-widest:  0.08em;
+
+  /* --- Spacing -------------------------------------------- */
+  --space-1:    0.25rem;  /* 4px  */
+  --space-2:    0.5rem;   /* 8px  */
+  --space-3:    0.75rem;  /* 12px */
+  --space-4:    1rem;     /* 16px */
+  --space-5:    1.25rem;  /* 20px */
+  --space-6:    1.5rem;   /* 24px */
+  --space-8:    2rem;     /* 32px */
+  --space-10:   2.5rem;   /* 40px */
+  --space-12:   3rem;     /* 48px */
+  --space-16:   4rem;     /* 64px */
+  --space-20:   5rem;     /* 80px */
+  --space-24:   6rem;     /* 96px */
+
+  /* Container padding */
+  --padding-container: var(--space-6); /* 24px */
+
+  /* --- Border Radius --------------------------------------- */
+  --radius-xs:  0.125rem;  /* 2px  */
+  --radius-sm:  0.25rem;   /* 4px  */
+  --radius:     0.5rem;    /* 8px  */
+  --radius-md:  0.75rem;   /* 12px */
+  --radius-lg:  1rem;      /* 16px */
+  --radius-xl:  1.5rem;    /* 24px */
+  --radius-2xl: 2rem;      /* 32px */
+  --radius-full:9999px;
+
+  /* --- Shadows --------------------------------------------- */
+  --shadow-xs:  0 1px 2px 0 rgba(37,25,19,0.05);
+  --shadow-sm:  0 1px 3px 0 rgba(37,25,19,0.08), 0 1px 2px -1px rgba(37,25,19,0.05);
+  --shadow:     0 4px 6px -1px rgba(37,25,19,0.07), 0 2px 4px -2px rgba(37,25,19,0.05);
+  --shadow-md:  0 10px 15px -3px rgba(37,25,19,0.07), 0 4px 6px -4px rgba(37,25,19,0.05);
+  --shadow-lg:  0 20px 25px -5px rgba(37,25,19,0.08), 0 8px 10px -6px rgba(37,25,19,0.04);
+  --shadow-xl:  0 25px 50px -12px rgba(37,25,19,0.15);
+  --shadow-inset: inset 0 2px 4px 0 rgba(37,25,19,0.05);
+  --shadow-glow-primary: 0 0 0 3px rgba(157,67,0,0.2);
+  --shadow-glow-tertiary: 0 0 0 3px rgba(0,106,96,0.2);
+
+  /* --- Transitions ----------------------------------------- */
+  --transition-fast:   150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition:        250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow:   400ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-spring: 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* --- Z-Index --------------------------------------------- */
+  --z-below:     -1;
+  --z-base:       0;
+  --z-raised:    10;
+  --z-dropdown:  20;
+  --z-sticky:    30;
+  --z-overlay:   40;
+  --z-modal:     50;
+  --z-toast:     60;
+  --z-tooltip:   70;
+
+  /* --- Layout --------------------------------------------- */
+  --max-width-sm:  480px;
+  --max-width-md:  768px;
+  --max-width-lg:  1024px;
+  --max-width-xl:  1280px;
+  --sidebar-width: 260px;
+}

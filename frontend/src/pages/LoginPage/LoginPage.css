@@ -1,0 +1,274 @@
+/* LoginPage.css */
+
+.login-page {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+}
+
+/* ================================================================
+   Panel izquierdo — Visual / Branding
+   ================================================================ */
+.login-visual {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-dark)   0%,
+    var(--color-primary)        40%,
+    var(--color-primary-light)  70%,
+    #d46010                     100%
+  );
+  display: flex;
+  align-items: flex-end;
+  padding: var(--space-12);
+}
+
+.login-visual-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 40%, rgba(255,255,255,0.12) 0%, transparent 60%);
+}
+
+.login-visual-content {
+  position: relative;
+  z-index: 1;
+  color: white;
+}
+
+.login-brand-logo {
+  margin-bottom: var(--space-4);
+  width: 56px;
+  height: 56px;
+  background: rgba(255,255,255,0.15);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.login-visual-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-display-md);
+  font-weight: var(--fw-bold);
+  color: white;
+  margin-bottom: var(--space-4);
+  letter-spacing: var(--ls-tight);
+  line-height: var(--lh-tight);
+}
+
+.login-visual-subtitle {
+  font-size: var(--text-body-md);
+  color: rgba(255,255,255,0.85);
+  line-height: var(--lh-relaxed);
+  margin-bottom: var(--space-8);
+  max-width: 360px;
+}
+
+.login-visual-features {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.login-feature-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-body-sm);
+  color: rgba(255,255,255,0.9);
+}
+
+/* Decorative cell circles */
+.login-visual-circles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.login-visual-circles > div {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.15);
+  animation: float-circle linear infinite;
+}
+
+.vc-1 { width: 300px; height: 300px; top: -80px;  right: -60px;  animation-duration: 20s; background: rgba(255,255,255,0.04); }
+.vc-2 { width: 180px; height: 180px; top: 120px;  right: 80px;   animation-duration: 15s; animation-delay: -5s; }
+.vc-3 { width: 120px; height: 120px; top: 60%;    right: -20px;  animation-duration: 12s; animation-delay: -3s; }
+.vc-4 { width: 80px;  height: 80px;  top: 40%;    left:  40px;   animation-duration: 18s; animation-delay: -8s; }
+.vc-5 { width: 200px; height: 200px; bottom: 40px; right: 30px;  animation-duration: 25s; animation-delay: -12s; }
+
+@keyframes float-circle {
+  0%   { transform: translateY(0px) scale(1); }
+  50%  { transform: translateY(-20px) scale(1.03); }
+  100% { transform: translateY(0px) scale(1); }
+}
+
+/* ================================================================
+   Panel derecho — Formulario
+   ================================================================ */
+.login-form-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+  padding: var(--space-8) var(--space-6);
+  overflow-y: auto;
+}
+
+.login-form-container {
+  width: 100%;
+  max-width: 420px;
+  animation: fadeInUp 0.45s ease both;
+}
+
+/* Tabs */
+.login-tabs {
+  display: flex;
+  gap: 0;
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  margin-bottom: var(--space-8);
+}
+
+.login-tab {
+  flex: 1;
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-sans);
+  font-size: var(--text-label-md);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.login-tab:hover:not(.login-tab-active) {
+  color: var(--color-text-secondary);
+  background: rgba(255,255,255,0.6);
+}
+
+.login-tab-active {
+  background: var(--color-surface);
+  color: var(--color-primary-dark);
+  font-weight: var(--fw-semibold);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Heading */
+.login-heading {
+  margin-bottom: var(--space-8);
+}
+
+.login-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-headline-h2);
+  font-weight: var(--fw-bold);
+  color: var(--color-text);
+  margin-bottom: var(--space-2);
+}
+
+.login-subtitle {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  line-height: var(--lh-relaxed);
+}
+
+/* Form */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* Error banner */
+.form-error-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-error-tint);
+  color: var(--color-error);
+  border-radius: var(--radius-md);
+  font-size: var(--text-label-md);
+  border: 1px solid rgba(186, 26, 26, 0.2);
+  animation: bounceIn 0.3s ease;
+}
+
+/* Security note */
+.login-security-note {
+  text-align: center;
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+  margin-top: var(--space-2);
+}
+
+/* Switch mode */
+.login-switch {
+  text-align: center;
+  margin-top: var(--space-6);
+  font-size: var(--text-label-md);
+  color: var(--color-text-muted);
+}
+
+.login-switch-btn {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: var(--text-label-md);
+  font-family: var(--font-sans);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  transition: color var(--transition-fast);
+}
+
+.login-switch-btn:hover { color: var(--color-primary-dark); }
+
+/* Password strength */
+.password-strength {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-1);
+}
+
+.strength-bars {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+
+.strength-bar {
+  flex: 1;
+  height: 3px;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  transition: background var(--transition);
+}
+
+.strength-label {
+  font-size: var(--text-caption);
+  font-weight: var(--fw-semibold);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .login-page {
+    grid-template-columns: 1fr;
+  }
+  .login-visual {
+    min-height: 200px;
+    align-items: center;
+    padding: var(--space-8) var(--space-6);
+  }
+  .login-visual-title  { font-size: var(--text-headline-h1); }
+  .login-visual-circles { display: none; }
+}

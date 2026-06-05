@@ -17,6 +17,8 @@ import cloudinary
 import cloudinary.uploader
 from app.api.routes.predict import router as predict_router
 
+from fastapi.middleware.cors import CORSMiddleware
+
 # ---------------------------------------------------------------------------
 # Instancia principal de la aplicación FastAPI
 # ---------------------------------------------------------------------------
@@ -30,6 +32,20 @@ app = FastAPI(
     version="1.0.0",
     docs_url="/docs",       # Swagger UI
     redoc_url="/redoc",     # ReDoc
+)
+
+# Configuración de CORS
+origins = [
+    "http://localhost:5173",
+    "http://localhost:5173/",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -57,3 +73,9 @@ async def root() -> dict:
 
 # Router de autenticación: /auth/register, /auth/login, /users/me
 app.include_router(auth_router)
+
+# Router de análisis
+app.include_router(analyze_router)
+
+# Router de predicción (YOLOv8n)
+app.include_router(predict_router)
