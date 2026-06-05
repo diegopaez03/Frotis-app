@@ -56,13 +56,39 @@
   cursor: grabbing;
 }
 
-/* Transform layer */
+/* Loading overlay — spinner centrado, sin bloquear la imagen */
+.viewer-loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  background: var(--color-bg-subtle);
+  z-index: 10;
+}
+
+.viewer-loading-overlay p {
+  font-size: var(--text-label-sm);
+  color: var(--color-text-muted);
+}
+
+/* Transform layer — invisible hasta que la imagen carga */
 .viewer-transform-layer {
   transition: transform 0.05s linear;
   will-change: transform;
+  opacity: 0;
+  position: relative;
+  display: inline-block;
+  line-height: 0;
 }
 
-/* Image */
+.viewer-transform-layer.is-ready {
+  opacity: 1;
+}
+
+/* Image — sin trucos de opacity, se muestra directamente */
 .viewer-image {
   display: block;
   max-width: 100%;
@@ -71,17 +97,7 @@
   height: auto;
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
-  opacity: 0;
-  transition: opacity 0.3s ease;
   pointer-events: none;
-}
-
-.viewer-image.is-loaded {
-  opacity: 1;
-}
-
-.viewer-skeleton {
-  border-radius: var(--radius);
 }
 
 /* Bounding box overlay */
@@ -125,6 +141,12 @@
 
 .viewer-error {
   color: var(--color-error);
+}
+
+.viewer-error-link {
+  font-size: var(--text-label-sm);
+  color: var(--color-primary);
+  text-decoration: underline;
 }
 
 /* Footer hint */

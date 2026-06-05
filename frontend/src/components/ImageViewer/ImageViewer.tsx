@@ -11,13 +11,12 @@ import {
   useEffect,
   MouseEvent as ReactMouseEvent,
   TouchEvent as ReactTouchEvent,
-  WheelEvent,
 } from 'react';
 import type { DeteccionItem } from '../../types/api';
 import './ImageViewer.css';
 
 // ---------------------------------------------------------------------------
-// Paleta de colores por clase (tricolor + extras)
+// Paleta de colores por clase
 // ---------------------------------------------------------------------------
 
 const CELL_COLORS: readonly string[] = [
@@ -40,7 +39,7 @@ const MAX_ZOOM  = 5.0;
 const ZOOM_STEP = 0.25;
 
 // ---------------------------------------------------------------------------
-// Tipos de props
+// Tipos
 // ---------------------------------------------------------------------------
 
 interface ImageViewerProps {
@@ -50,7 +49,7 @@ interface ImageViewerProps {
   className?:  string;
 }
 
-interface Offset { x: number; y: number; }
+interface Offset      { x: number; y: number; }
 interface NaturalSize { w: number; h: number; }
 
 // ---------------------------------------------------------------------------
@@ -74,7 +73,7 @@ export default function ImageViewer({
   const [imgLoaded,      setImgLoaded]      = useState(false);
   const [imgError,       setImgError]       = useState(false);
 
-  // Resetear al cambiar imagen
+  // Resetear estado cuando cambia la URL
   useEffect(() => {
     setZoom(1);
     setOffset({ x: 0, y: 0 });
@@ -82,6 +81,25 @@ export default function ImageViewer({
     setImgError(false);
   }, [imageUrl]);
 
+  /**
+   * Detectar imágenes ya en caché del navegador.
+   * El evento `onLoad` de React NO se dispara si la imagen ya estaba cacheada.
+   * Verificamos `img.complete` en el siguiente tick (después de que React
+   * actualice el DOM con el nuevo src).
+   */
+  useEffect(() => {
+    if (!imageUrl) return;
+    const timer = setTimeout(() => {
+      const img = imgRef.current;
+      if (img && img.complete && img.naturalWidth > 0) {
+        setImgNaturalSize({ w: img.naturalWidth, h: img.naturalHeight });
+        setImgLoaded(true);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [imageUrl]);
+
+  // Handler para el evento onLoad de React (imágenes no cacheadas)
   const handleImgLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>): void => {
     setImgNaturalSize({ w: e.currentTarget.naturalWidth, h: e.currentTarget.naturalHeight });
     setImgLoaded(true);
@@ -90,7 +108,7 @@ export default function ImageViewer({
   // Zoom con rueda del mouse (pasivo: prevenimos default via addEventListener)
   const handleWheel = useCallback((e: Event): void => {
     e.preventDefault();
-    const we = e as unknown as WheelEvent;
+    const we = e as unknown as { deltaY: number };
     const delta = we.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
     setZoom((z) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z + delta)));
   }, []);
@@ -102,7 +120,7 @@ export default function ImageViewer({
     return () => container.removeEventListener('wheel', handleWheel);
   }, [handleWheel]);
 
-  // Pan
+  // Pan — mouse
   const handleMouseDown = useCallback(
     (e: ReactMouseEvent<HTMLDivElement>): void => {
       if (e.button !== 0) return;
@@ -123,7 +141,7 @@ export default function ImageViewer({
 
   const handleMouseUp = useCallback((): void => setIsDragging(false), []);
 
-  // Touch support
+  // Pan — touch
   const touchStartRef = useRef<Offset | null>(null);
 
   const handleTouchStart = useCallback(
@@ -182,18 +200,10 @@ export default function ImageViewer({
         <div
           key={idx}
           className="bbox"
-          style={{
-            position: 'absolute',
-            left, top, width, height,
-            border: `2px solid ${color}`,
-            boxSizing: 'border-box',
-          }}
+          style={{ position: 'absolute', left, top, width, height, border: `2px solid ${color}`, boxSizing: 'border-box' }}
           title={`${det.clase} — ${pct}%`}
         >
-          <span
-            className="bbox-label"
-            style={{ background: color, color: '#fff', top: '-20px', left: '-1px' }}
-          >
+          <span className="bbox-label" style={{ background: color, color: '#fff', top: '-20px', left: '-1px' }}>
             {det.clase} {pct}%
           </span>
         </div>
@@ -201,22 +211,25 @@ export default function ImageViewer({
     });
   }
 
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
+
   return (
     <div className={`image-viewer ${className}`} aria-label="Visor de imagen de frotis">
-      {/* Controls bar */}
+      {/* Barra de controles */}
       <div className="image-viewer-controls" role="toolbar" aria-label="Controles del visor">
-        <button className="btn btn-ghost btn-sm" onClick={zoomOut}  id="viewer-zoom-out"  title="Reducir zoom"       aria-label="Reducir zoom">−</button>
+        <button className="btn btn-ghost btn-sm" onClick={zoomOut} id="viewer-zoom-out" aria-label="Reducir zoom">−</button>
         <span   className="viewer-zoom-label" aria-live="polite">{Math.round(zoom * 100)}%</span>
-        <button className="btn btn-ghost btn-sm" onClick={zoomIn}   id="viewer-zoom-in"   title="Aumentar zoom"      aria-label="Aumentar zoom">+</button>
+        <button className="btn btn-ghost btn-sm" onClick={zoomIn}  id="viewer-zoom-in"  aria-label="Aumentar zoom">+</button>
         <div    className="viewer-controls-divider" aria-hidden="true" />
-        <button className="btn btn-ghost btn-sm" onClick={resetView} id="viewer-reset"     title="Restablecer vista"  aria-label="Restablecer vista">⟳</button>
+        <button className="btn btn-ghost btn-sm" onClick={resetView} id="viewer-reset" aria-label="Restablecer vista">⟳</button>
         {imageUrl && (
           <a
             className="btn btn-ghost btn-sm"
             href={imageUrl}
             target="_blank"
             rel="noopener noreferrer"
-            title="Abrir imagen original"
             id="viewer-open-original"
             aria-label="Abrir imagen original en nueva pestaña"
           >↗</a>
@@ -235,8 +248,9 @@ export default function ImageViewer({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         role="img"
-        aria-label="Imagen de frotis sanguíneo con detecciones"
+        aria-label="Imagen de frotis sanguíneo"
       >
+        {/* Sin imagen */}
         {!imageUrl && (
           <div className="viewer-placeholder">
             <span className="viewer-placeholder-icon" aria-hidden="true">🔬</span>
@@ -244,47 +258,57 @@ export default function ImageViewer({
           </div>
         )}
 
+        {/* Error de carga */}
         {imageUrl && imgError && (
           <div className="viewer-placeholder viewer-error">
             <span aria-hidden="true">⚠</span>
-            <p>No se pudo cargar la imagen. Verifica la URL.</p>
+            <p>No se pudo cargar la imagen.</p>
+            <a href={imageUrl} target="_blank" rel="noopener noreferrer" className="viewer-error-link">
+              Abrir URL directamente ↗
+            </a>
           </div>
         )}
 
+        {/* Imagen con zoom/pan */}
         {imageUrl && !imgError && (
-          <div
-            className="viewer-transform-layer"
-            style={{
-              transform:       `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
-              transformOrigin: 'center center',
-              position:        'relative',
-              display:         'inline-block',
-            }}
-          >
+          <>
+            {/* Spinner de carga — sólo mientras la imagen no ha cargado */}
             {!imgLoaded && (
-              <div className="viewer-skeleton skeleton" style={{ width: 600, height: 450 }} />
-            )}
-            <img
-              ref={imgRef}
-              src={imageUrl}
-              alt="Frotis sanguíneo para análisis"
-              className={`viewer-image${imgLoaded ? ' is-loaded' : ''}`}
-              onLoad={handleImgLoad}
-              onError={() => setImgError(true)}
-              draggable={false}
-            />
-            {imgLoaded && (
-              <div className="bbox-overlay" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-                {renderBboxes()}
+              <div className="viewer-loading-overlay" aria-label="Cargando imagen…">
+                <div className="spinner" aria-hidden="true" />
+                <p>Cargando imagen…</p>
               </div>
             )}
-          </div>
+
+            <div
+              className={`viewer-transform-layer${imgLoaded ? ' is-ready' : ''}`}
+              style={{
+                transform:       `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
+                transformOrigin: 'center center',
+              }}
+            >
+              <img
+                ref={imgRef}
+                src={imageUrl}
+                alt="Frotis sanguíneo para análisis"
+                className="viewer-image"
+                onLoad={handleImgLoad}
+                onError={() => setImgError(true)}
+                draggable={false}
+              />
+              {imgLoaded && (
+                <div className="bbox-overlay" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+                  {renderBboxes()}
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
 
       {imageUrl && imgLoaded && (
-        <p className="viewer-hint" aria-label="Instrucción del visor">
-          🖱 Rueda para hacer zoom · Arrastra para mover
+        <p className="viewer-hint">
+          🖱 Rueda para zoom · Arrastra para mover
           {detections.length > 0 && ` · ${detections.length} detección${detections.length !== 1 ? 'es' : ''}`}
         </p>
       )}

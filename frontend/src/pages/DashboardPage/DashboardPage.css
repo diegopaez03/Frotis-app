@@ -233,6 +233,56 @@
   border-radius: var(--radius-lg);
 }
 
+/* Thumbnail con imagen real */
+.analysis-card-thumb-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform var(--transition);
+}
+
+.analysis-card:hover .analysis-card-thumb-img {
+  transform: scale(1.04);
+}
+
+/* Overlay oscuro + conteo sobre imagen real */
+.analysis-card-thumb-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 60%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: var(--space-3);
+  z-index: 1;
+}
+
+.analysis-card-thumb-count-overlay {
+  font-family: var(--font-serif);
+  font-size: var(--text-display-md);
+  font-weight: var(--fw-bold);
+  color: #fff;
+  line-height: 1;
+}
+
+.analysis-card-thumb-unit-overlay {
+  font-size: var(--text-label-sm);
+  color: rgba(255,255,255,0.85);
+  font-weight: var(--fw-medium);
+}
+
+/* Chip muted (sin clasificación) */
+.chip.chip-muted {
+  color: var(--color-text-muted);
+  background: var(--color-bg-subtle);
+  border-color: var(--color-border-subtle);
+  font-style: italic;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   .dashboard-stats {

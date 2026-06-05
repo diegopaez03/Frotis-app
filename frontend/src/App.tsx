@@ -12,6 +12,7 @@ import ProtectedRoute      from './components/ProtectedRoute/ProtectedRoute';
 import LoginPage           from './pages/LoginPage/LoginPage';
 import DashboardPage       from './pages/DashboardPage/DashboardPage';
 import WorkspacePage       from './pages/WorkspacePage/WorkspacePage';
+import AnalysisDetailPage  from './pages/AnalysisDetailPage/AnalysisDetailPage';
 
 export default function App() {
   return (
@@ -25,8 +26,9 @@ export default function App() {
             {/* Rutas protegidas */}
             <Route element={<ProtectedRoute />}>
               <Route element={<AppLayout />}>
-                <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/workspace"  element={<WorkspacePage />} />
+                <Route path="/dashboard"         element={<DashboardPage />} />
+                <Route path="/workspace"          element={<WorkspacePage />} />
+                <Route path="/analysis/:id"       element={<AnalysisDetailPage />} />
               </Route>
             </Route>
 

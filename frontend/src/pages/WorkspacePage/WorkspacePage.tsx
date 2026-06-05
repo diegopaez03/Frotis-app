@@ -12,14 +12,13 @@ import {
   ChangeEvent,
   FormEvent,
 } from 'react';
-import { useLocation } from 'react-router-dom';
 import ImageViewer from '../../components/ImageViewer/ImageViewer';
 import ResultsPanel from '../../components/ResultsPanel/ResultsPanel';
 import { analysisAPI } from '../../services/api';
 import { validateImageFile } from '../../utils/validators';
 import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
-import type { PredictResponse, ApiError, AnalysisRecord } from '../../types/api';
+import type { PredictResponse, ApiError } from '../../types/api';
 import './WorkspacePage.css';
 
 // ---------------------------------------------------------------------------
@@ -146,14 +145,6 @@ function CloudinaryUrlInput({ onUrl, isDisabled }: CloudinaryUrlInputProps) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Tipos para el estado de la ubicación
-// ---------------------------------------------------------------------------
-
-interface WorkspaceLocationState {
-  analysis?: AnalysisRecord;
-}
-
 type UploadMode = 'file' | 'url';
 
 // ---------------------------------------------------------------------------
@@ -162,20 +153,16 @@ type UploadMode = 'file' | 'url';
 
 export default function WorkspacePage() {
   const { isAuthenticated } = useAuth();
-  const { showToast } = useToast();
-  const location = useLocation();
+  const { showToast }       = useToast();
 
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile,     setImageFile]     = useState<File | null>(null);
+  const [imagePreview,  setImagePreview]  = useState<string | null>(null);
   const [cloudinaryUrl, setCloudinaryUrl] = useState<string | null>(null);
-  const [prediction, setPrediction] = useState<PredictResponse | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [isPredicting, setIsPredicting] = useState(false);
-  const [uploadMode, setUploadMode] = useState<UploadMode>('file');
-  const [showBboxes, setShowBboxes] = useState(true);
-
-  // Datos del análisis previo (desde dashboard)
-  const _prevAnalysis = (location.state as WorkspaceLocationState | null)?.analysis;
+  const [prediction,    setPrediction]    = useState<PredictResponse | null>(null);
+  const [isUploading,   setIsUploading]   = useState(false);
+  const [isPredicting,  setIsPredicting]  = useState(false);
+  const [uploadMode,    setUploadMode]    = useState<UploadMode>('file');
+  const [showBboxes,    setShowBboxes]    = useState(true);
 
   // ------------------------------------------------------------------
   // Manejar selección de archivo

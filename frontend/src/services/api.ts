@@ -28,6 +28,7 @@ import type {
   PredictResponse,
   AnalyzeResponse,
   UploadAndPredictResult,
+  AnalysisListItem,
   ApiError,
 } from '../types/api';
 
@@ -182,7 +183,6 @@ async function withRetry<T>(
 
 export const authAPI = {
   register(data: UserCreate): Promise<UserResponse> {
-    console.log(data);
     return withRetry(() =>
       apiClient.post<UserResponse>('/auth/register', data).then((r) => r.data)
     );
@@ -206,6 +206,20 @@ export const authAPI = {
 // ---------------------------------------------------------------------------
 
 export const analysisAPI = {
+  /** GET /analysis — lista de análisis del usuario autenticado */
+  getAll(): Promise<AnalysisListItem[]> {
+    return withRetry(() =>
+      apiClient.get<AnalysisListItem[]>('/analysis').then((r) => r.data)
+    );
+  },
+
+  /** GET /analysis/{analysis_id} — detalle de un análisis */
+  getById(id: string): Promise<AnalysisListItem> {
+    return withRetry(() =>
+      apiClient.get<AnalysisListItem>(`/analysis/${id}`).then((r) => r.data)
+    );
+  },
+
   predict(payload: PredictRequest): Promise<PredictResponse> {
     return withRetry(
       () => apiClient.post<PredictResponse>('/predict', payload).then((r) => r.data),

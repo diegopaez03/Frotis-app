@@ -88,16 +88,23 @@ export interface ApiError {
 }
 
 // ---------------------------------------------------------------------------
-// Analysis card (dashboard mock shape)
+// Analysis list — GET /analysis response shape
 // ---------------------------------------------------------------------------
 
-export interface AnalysisRecord {
+/** Un ítem tal como lo devuelve GET /analysis */
+export interface AnalysisListItem {
   id: string;
-  analisis_id: string;
-  imagen_url: string | null;
+  imagen_url: string;
   estado: 'COMPLETED' | 'PENDING' | 'FAILED';
-  total_detecciones: number;
-  clases_detectadas: string[];
   fecha: string;
-  tipo: string;
+  total_detecciones: number;
+  distribucion: Record<string, ClaseDistribucion>;
+  detecciones: DeteccionItem[];
 }
+
+/**
+ * Alias mantenido para compatibilidad con los componentes existentes.
+ * Se deriva de AnalysisListItem; las clases_detectadas se extraen
+ * de las keys de distribucion.
+ */
+export type AnalysisRecord = AnalysisListItem;
