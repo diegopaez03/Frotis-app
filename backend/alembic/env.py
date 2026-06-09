@@ -51,7 +51,15 @@ DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT")
 DB_NAME = os.getenv("DB_NAME")
 
-DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+# Heroku Postgres inyecta DATABASE_URL directamente.
+# SQLAlchemy requiere "postgresql://" en vez de "postgres://".
+_raw_url = os.getenv("DATABASE_URL")
+
+if _raw_url:
+    DATABASE_URL = _raw_url.replace("postgres://", "postgresql://", 1)
+else:
+    DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
 # ---------------------------------------------------------------------------

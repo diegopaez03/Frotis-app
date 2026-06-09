@@ -39,9 +39,22 @@ DB_HOST: str = os.getenv("DB_HOST", "db")       # "db" = nombre del servicio en 
 DB_PORT: str = os.getenv("DB_PORT", "5432")
 DB_NAME: str = os.getenv("DB_NAME", "frotis_db")
 
-DATABASE_URL: str = (
-    f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-)
+# ---------------------------------------------------------------------------
+# Construcción de DATABASE_URL
+# ---------------------------------------------------------------------------
+# Heroku Postgres inyecta una variable DATABASE_URL lista para usar.
+# SQLAlchemy requiere el esquema "postgresql://" (no "postgres://").
+# En desarrollo local se construye a partir de las variables individuales.
+
+_raw_url: str | None = os.getenv("DATABASE_URL")
+
+if _raw_url:
+    # Heroku entrega "postgres://..." — SQLAlchemy necesita "postgresql://..."
+    DATABASE_URL: str = _raw_url.replace("postgres://", "postgresql://", 1)
+else:
+    DATABASE_URL: str = (
+        f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    )
 
 # ---------------------------------------------------------------------------
 # 2. Engine — conexión al servidor PostgreSQL

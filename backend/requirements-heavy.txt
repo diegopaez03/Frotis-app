@@ -1,0 +1,6 @@
+# Dependencias pesadas de ML/DL — se instalan primero para maximizar el cache de Docker.
+# Al cambiar solo el código de la app o requirements.txt, esta capa no se reconstruye.
+# Se instala desde el índice oficial CPU de PyTorch para evitar descargar variantes CUDA (~4 GB extra).
+
+torch==2.7.0+cpu
+torchvision==0.22.0+cpu

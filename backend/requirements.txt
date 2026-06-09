@@ -8,18 +8,18 @@ uvicorn[standard]
 psycopg2-binary
 pydantic[email]
 python-multipart
+aiofiles
 Pillow
 
-# --- Machine Learning ---
+# --- Machine Learning (ligero) ---
 matplotlib
 pandas
 numpy
 
-# --- DeepLearning y CV ---
-torch
-torchvision
-ultralytics
+# --- CV (solo headless, sin dependencias de display) ---
+# torch y torchvision se instalan por separado desde requirements-heavy.txt
 opencv-python-headless
+ultralytics
 
 # --- Testing ---
 pytest
