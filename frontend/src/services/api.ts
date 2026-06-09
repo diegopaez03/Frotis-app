@@ -30,6 +30,8 @@ import type {
   UploadAndPredictResult,
   AnalysisListItem,
   ApiError,
+  FeedbackRequest,
+  FeedbackResponse,
 } from '../types/api';
 
 // ---------------------------------------------------------------------------
@@ -245,6 +247,12 @@ export const analysisAPI = {
     const prediction   = await this.predict({ image_url: uploadResult.cloudinary_url });
 
     return { cloudinary_url: uploadResult.cloudinary_url, prediction };
+  },
+
+  submitFeedback(analysisId: string, payload: FeedbackRequest): Promise<FeedbackResponse> {
+    return withRetry(() =>
+      apiClient.post<FeedbackResponse>(`/analysis/${analysisId}/feedback`, payload).then((r) => r.data)
+    );
   },
 };
 

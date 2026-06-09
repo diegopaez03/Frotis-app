@@ -108,3 +108,26 @@ export interface AnalysisListItem {
  * de las keys de distribucion.
  */
 export type AnalysisRecord = AnalysisListItem;
+
+// ---------------------------------------------------------------------------
+// Feedback — POST /analysis/{analysis_id}/feedback
+// ---------------------------------------------------------------------------
+
+export type TipoCorreccion = 'FALSO_POSITIVO' | 'CAMBIO_CLASE' | 'NUEVA_DETECCION';
+
+export interface FeedbackItem {
+  deteccion_id: string | null;
+  tipoCorreccion: TipoCorreccion;
+  claseCorregida?: string;
+  bbox_corregido?: [number, number, number, number];
+}
+
+export interface FeedbackRequest {
+  feedbacks: FeedbackItem[];
+}
+
+export interface FeedbackResponse {
+  status: string;
+  message: string;
+}
+

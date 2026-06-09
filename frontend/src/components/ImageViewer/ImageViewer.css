@@ -56,6 +56,10 @@
   cursor: grabbing;
 }
 
+.image-viewer-viewport.draw-mode {
+  cursor: crosshair;
+}
+
 /* Loading overlay — spinner centrado, sin bloquear la imagen */
 .viewer-loading-overlay {
   position: absolute;

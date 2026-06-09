@@ -12,6 +12,7 @@ import {
   ChangeEvent,
   FormEvent,
 } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ImageViewer from '../../components/ImageViewer/ImageViewer';
 import ResultsPanel from '../../components/ResultsPanel/ResultsPanel';
 import { analysisAPI } from '../../services/api';
@@ -154,6 +155,7 @@ type UploadMode = 'file' | 'url';
 export default function WorkspacePage() {
   const { isAuthenticated } = useAuth();
   const { showToast }       = useToast();
+  const navigate            = useNavigate();
 
   const [imageFile,     setImageFile]     = useState<File | null>(null);
   const [imagePreview,  setImagePreview]  = useState<string | null>(null);
@@ -200,6 +202,9 @@ export default function WorkspacePage() {
           setImagePreview(result.cloudinary_url);
           setPrediction(result.prediction);
           showToast('success', 'Análisis completado', `${result.prediction.total_detecciones} leucocitos detectados.`);
+          if (isAuthenticated && result.prediction.analisis_id) {
+            navigate(`/analysis/${result.prediction.analisis_id}`);
+          }
         } finally {
           setIsUploading(false);
         }
@@ -212,6 +217,9 @@ export default function WorkspacePage() {
           const result = await analysisAPI.predict({ image_url: cloudinaryUrl });
           setPrediction(result);
           showToast('success', 'Análisis completado', `${result.total_detecciones} leucocitos detectados en la imagen.`);
+          if (isAuthenticated && result.analisis_id) {
+            navigate(`/analysis/${result.analisis_id}`);
+          }
         } finally {
           setIsPredicting(false);
         }

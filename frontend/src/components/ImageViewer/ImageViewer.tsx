@@ -12,7 +12,7 @@ import {
   MouseEvent as ReactMouseEvent,
   TouchEvent as ReactTouchEvent,
 } from 'react';
-import type { DeteccionItem } from '../../types/api';
+import type { DeteccionItem, FeedbackItem } from '../../types/api';
 import './ImageViewer.css';
 
 // ---------------------------------------------------------------------------
@@ -47,6 +47,12 @@ interface ImageViewerProps {
   detections?: DeteccionItem[];
   showBboxes?: boolean;
   className?:  string;
+  // Feedback props
+  feedbackMode?: boolean;
+  drawTool?: 'pan' | 'draw';
+  onSelectDetection?: (det: DeteccionItem) => void;
+  onDrawBbox?: (bbox: [number, number, number, number]) => void;
+  pendingFeedbacks?: FeedbackItem[];
 }
 
 interface Offset      { x: number; y: number; }
@@ -61,6 +67,11 @@ export default function ImageViewer({
   detections = [],
   showBboxes = true,
   className  = '',
+  feedbackMode = false,
+  drawTool = 'pan',
+  onSelectDetection,
+  onDrawBbox,
+  pendingFeedbacks = [],
 }: ImageViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef       = useRef<HTMLImageElement>(null);
@@ -72,6 +83,11 @@ export default function ImageViewer({
   const [imgNaturalSize, setImgNaturalSize] = useState<NaturalSize>({ w: 0, h: 0 });
   const [imgLoaded,      setImgLoaded]      = useState(false);
   const [imgError,       setImgError]       = useState(false);
+
+  // Drawing state
+  const [isDrawingBbox, setIsDrawingBbox]     = useState(false);
+  const [drawStartFrac, setDrawStartFrac]     = useState<Offset | null>(null);
+  const [drawCurrentFrac, setDrawCurrentFrac] = useState<Offset | null>(null);
 
   // Resetear estado cuando cambia la URL
   useEffect(() => {
@@ -120,26 +136,78 @@ export default function ImageViewer({
     return () => container.removeEventListener('wheel', handleWheel);
   }, [handleWheel]);
 
-  // Pan — mouse
+  // Pan / Draw — mouse
   const handleMouseDown = useCallback(
     (e: ReactMouseEvent<HTMLDivElement>): void => {
       if (e.button !== 0) return;
+
+      if (feedbackMode && drawTool === 'draw') {
+        e.preventDefault();
+        const imgEl = imgRef.current;
+        if (!imgEl) return;
+        const rect = imgEl.getBoundingClientRect();
+        
+        // Calcular fracción dentro de la imagen
+        const startX = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        const startY = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+        
+        setIsDrawingBbox(true);
+        setDrawStartFrac({ x: startX, y: startY });
+        setDrawCurrentFrac({ x: startX, y: startY });
+        return;
+      }
+
       e.preventDefault();
       setIsDragging(true);
       setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
     },
-    [offset]
+    [offset, feedbackMode, drawTool]
   );
 
   const handleMouseMove = useCallback(
     (e: ReactMouseEvent<HTMLDivElement>): void => {
+      if (isDrawingBbox) {
+        const imgEl = imgRef.current;
+        if (!imgEl) return;
+        const rect = imgEl.getBoundingClientRect();
+        
+        const curX = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        const curY = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+        
+        setDrawCurrentFrac({ x: curX, y: curY });
+        return;
+      }
+
       if (!isDragging) return;
       setOffset({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
     },
-    [isDragging, dragStart]
+    [isDragging, dragStart, isDrawingBbox]
   );
 
-  const handleMouseUp = useCallback((): void => setIsDragging(false), []);
+  const handleMouseUp = useCallback((): void => {
+    if (isDrawingBbox) {
+      setIsDrawingBbox(false);
+      if (drawStartFrac && drawCurrentFrac && imgNaturalSize.w > 0 && imgNaturalSize.h > 0) {
+        const xMin = Math.min(drawStartFrac.x, drawCurrentFrac.x) * imgNaturalSize.w;
+        const yMin = Math.min(drawStartFrac.y, drawCurrentFrac.y) * imgNaturalSize.h;
+        const xMax = Math.max(drawStartFrac.x, drawCurrentFrac.x) * imgNaturalSize.w;
+        const yMax = Math.max(drawStartFrac.y, drawCurrentFrac.y) * imgNaturalSize.h;
+        
+        const w = xMax - xMin;
+        const h = yMax - yMin;
+        
+        // Solo emitir si cumple con un tamaño mínimo razonable (ej. 8 píxeles naturales)
+        if (w > 8 && h > 8) {
+          onDrawBbox?.([xMin, yMin, xMax, yMax]);
+        }
+      }
+      setDrawStartFrac(null);
+      setDrawCurrentFrac(null);
+      return;
+    }
+    
+    setIsDragging(false);
+  }, [isDrawingBbox, drawStartFrac, drawCurrentFrac, imgNaturalSize, onDrawBbox]);
 
   // Pan — touch
   const touchStartRef = useRef<Offset | null>(null);
@@ -176,7 +244,7 @@ export default function ImageViewer({
 
   // Renderizar bboxes
   function renderBboxes(): React.ReactNode {
-    if (!showBboxes || !imgLoaded || detections.length === 0) return null;
+    if (!showBboxes || !imgLoaded) return null;
     if (imgNaturalSize.w === 0 || imgNaturalSize.h === 0) return null;
 
     const imgEl = imgRef.current;
@@ -187,24 +255,93 @@ export default function ImageViewer({
     const scaleX    = renderedW / imgNaturalSize.w;
     const scaleY    = renderedH / imgNaturalSize.h;
 
-    return detections.map((det, idx) => {
+    // Modificaciones por feedback pendiente
+    const renderedDetections = detections.map((det) => {
+      const fb = pendingFeedbacks?.find((f) => f.deteccion_id === det.id);
+      if (fb) {
+        if (fb.tipoCorreccion === 'FALSO_POSITIVO') {
+          return { ...det, isFalsePositive: true };
+        }
+        if (fb.tipoCorreccion === 'CAMBIO_CLASE') {
+          return {
+            ...det,
+            clase: fb.claseCorregida || det.clase,
+            isClassChanged: true,
+          };
+        }
+      }
+      return det;
+    });
+
+    // Agregar nuevas detecciones manuales
+    const newDetections = pendingFeedbacks
+      ?.filter((f) => f.tipoCorreccion === 'NUEVA_DETECCION' && f.bbox_corregido)
+      .map((f, index) => ({
+        id: `new-${index}`,
+        clase: f.claseCorregida || 'Linfocito',
+        confianza: 1.0,
+        bbox: f.bbox_corregido!,
+        isNew: true,
+      })) || [];
+
+    const allDetections = [...renderedDetections, ...newDetections];
+
+    return allDetections.map((det, idx) => {
       const [x1, y1, x2, y2] = det.bbox;
       const left   = x1 * scaleX;
       const top    = y1 * scaleY;
       const width  = (x2 - x1) * scaleX;
       const height = (y2 - y1) * scaleY;
-      const color  = getColorForClass(det.clase);
-      const pct    = Math.round(det.confianza * 100);
+
+      const isFP = 'isFalsePositive' in det && det.isFalsePositive;
+      const isNew = 'isNew' in det && det.isNew;
+      const isCC = 'isClassChanged' in det && det.isClassChanged;
+
+      let color = getColorForClass(det.clase);
+      let borderStyle = 'solid';
+      let opacity = 1;
+      let labelSuffix = '';
+
+      if (isFP) {
+        color = 'var(--color-error)';
+        borderStyle = 'dashed';
+        opacity = 0.4;
+        labelSuffix = ' [Falso Positivo]';
+      } else if (isNew) {
+        borderStyle = 'dashed';
+        labelSuffix = ' [Nueva]';
+      } else if (isCC) {
+        labelSuffix = ' [Corregida]';
+      } else {
+        labelSuffix = ` ${Math.round(det.confianza * 100)}%`;
+      }
 
       return (
         <div
-          key={idx}
-          className="bbox"
-          style={{ position: 'absolute', left, top, width, height, border: `2px solid ${color}`, boxSizing: 'border-box' }}
-          title={`${det.clase} — ${pct}%`}
+          key={det.id || idx}
+          className={`bbox${isFP ? ' is-fp' : ''}${isNew ? ' is-new' : ''}${isCC ? ' is-cc' : ''}`}
+          style={{
+            position: 'absolute',
+            left,
+            top,
+            width,
+            height,
+            border: `2px ${borderStyle} ${color}`,
+            boxSizing: 'border-box',
+            opacity,
+            pointerEvents: feedbackMode && !isFP ? 'auto' : 'none',
+            cursor: feedbackMode && !isFP ? 'pointer' : 'default',
+          }}
+          onClick={(e) => {
+            if (feedbackMode && onSelectDetection && !isFP && !isNew) {
+              e.stopPropagation();
+              onSelectDetection(det as DeteccionItem);
+            }
+          }}
+          title={`${det.clase}${labelSuffix}`}
         >
           <span className="bbox-label" style={{ background: color, color: '#fff', top: '-20px', left: '-1px' }}>
-            {det.clase} {pct}%
+            {det.clase}{labelSuffix}
           </span>
         </div>
       );
@@ -239,7 +376,7 @@ export default function ImageViewer({
       {/* Viewport */}
       <div
         ref={containerRef}
-        className={`image-viewer-viewport${isDragging ? ' is-dragging' : ''}`}
+        className={`image-viewer-viewport${isDragging ? ' is-dragging' : ''}${feedbackMode && drawTool === 'draw' ? ' draw-mode' : ''}`}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -297,9 +434,28 @@ export default function ImageViewer({
                 draggable={false}
               />
               {imgLoaded && (
-                <div className="bbox-overlay" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-                  {renderBboxes()}
-                </div>
+                <>
+                  <div className="bbox-overlay" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+                    {renderBboxes()}
+                  </div>
+                  {isDrawingBbox && drawStartFrac && drawCurrentFrac && (
+                    <div
+                      className="bbox-drawing-temp"
+                      style={{
+                        position: 'absolute',
+                        left: `${Math.min(drawStartFrac.x, drawCurrentFrac.x) * 100}%`,
+                        top: `${Math.min(drawStartFrac.y, drawCurrentFrac.y) * 100}%`,
+                        width: `${Math.abs(drawStartFrac.x - drawCurrentFrac.x) * 100}%`,
+                        height: `${Math.abs(drawStartFrac.y - drawCurrentFrac.y) * 100}%`,
+                        border: '2px dashed var(--color-primary)',
+                        background: 'rgba(243, 116, 33, 0.15)',
+                        boxSizing: 'border-box',
+                        pointerEvents: 'none',
+                        zIndex: 100,
+                      }}
+                    />
+                  )}
+                </>
               )}
             </div>
           </>
