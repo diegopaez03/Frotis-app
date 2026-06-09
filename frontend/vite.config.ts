@@ -7,16 +7,16 @@ import react from '@vitejs/plugin-react';
  */
 export default defineConfig({
   plugins: [react()],
-  envDir: '../',
 
   server: {
     port: 5173,
     // Proxy para evitar CORS en desarrollo local
     proxy: {
-      '/auth':    { target: 'http://localhost:8000', changeOrigin: true },
-      '/users':   { target: 'http://localhost:8000', changeOrigin: true },
-      '/predict': { target: 'http://localhost:8000', changeOrigin: true },
-      '/analyze': { target: 'http://localhost:8000', changeOrigin: true },
+      '/auth':     { target: 'http://localhost:8000', changeOrigin: true },
+      '/users':    { target: 'http://localhost:8000', changeOrigin: true },
+      '/predict':  { target: 'http://localhost:8000', changeOrigin: true },
+      '/analyze':  { target: 'http://localhost:8000', changeOrigin: true },
+      '/analysis': { target: 'http://localhost:8000', changeOrigin: true },
     },
   },
 
