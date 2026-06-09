@@ -110,6 +110,6 @@ if _STATIC_DIR.exists():
     # Catch-all: devolver index.html para que React Router maneje la navegación.
     # DEBE ir al final, después de todos los routers de la API.
     @app.get("/{full_path:path}", include_in_schema=False)
-    async def serve_spa(_full_path: str) -> FileResponse:
+    async def serve_spa(full_path: str) -> FileResponse:
         """Sirve el index.html del frontend para todas las rutas no capturadas por la API."""
         return FileResponse(str(_STATIC_DIR / "index.html"))
