@@ -25,10 +25,11 @@ export default defineConfig({
     sourcemap: false,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
-          http:   ['axios'],
+        // Vite 8 usa Rolldown como bundler: manualChunks debe ser función, no objeto.
+        manualChunks(id: string) {
+          if (id.includes('react-dom') || id.includes('react/jsx'))  return 'vendor';
+          if (id.includes('react-router'))                            return 'router';
+          if (id.includes('axios'))                                   return 'http';
         },
       },
     },
