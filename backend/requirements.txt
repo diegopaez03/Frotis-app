@@ -19,7 +19,7 @@ numpy
 # --- CV (solo headless, sin dependencias de display) ---
 # torch y torchvision se instalan por separado desde requirements-heavy.txt
 opencv-python-headless
-ultralytics
+onnxruntime>=1.16.0
 
 # --- Testing ---
 pytest
@@ -27,6 +27,7 @@ httpx
 pytest-asyncio
 
 # --- Utilidades ---
+requests
 cloudinary
 python-dotenv
 python-jose[cryptography]

@@ -78,41 +78,14 @@ def seed_classes(db_session: Session):
 # Mocks de Inferencia YOLO
 # ---------------------------------------------------------------------------
 
-class MockBox:
-    """Mock que emula la estructura de cajas de detección de Ultralytics YOLO."""
-    def __init__(self, xyxy, cls_id, conf):
-        # Emula tensores de PyTorch/numpy en CPU (usando numpy array para soportar .tolist())
-        import numpy as np
-        np_xyxy = np.array(xyxy)
-        self.xyxy = [MagicMock(cpu=lambda: MagicMock(numpy=lambda: np_xyxy))]
-        self.cls = [MagicMock(cpu=lambda: MagicMock(numpy=lambda: MagicMock(item=lambda: cls_id)))]
-        self.conf = [MagicMock(cpu=lambda: MagicMock(numpy=lambda: MagicMock(item=lambda: conf)))]
-
-class MockResult:
-    """Mock que emula el resultado de inferencia retornado por YOLO."""
-    def __init__(self, boxes, orig_img):
-        self.boxes = boxes
-        self.orig_img = orig_img
-
-def get_mock_yolo_predictions():
-    """Genera una predicción simulada con 2 leucocitos: 1 Neutrófilo (ID 6) y 1 Linfocito (ID 4)."""
-    box1 = MockBox([10.5, 20.0, 110.5, 120.0], 6, 0.94)  # Neutrófilo
-    box2 = MockBox([200.0, 150.5, 300.0, 250.5], 4, 0.89) # Linfocito
-    
-    import numpy as np
-    mock_orig_img = np.zeros((480, 640, 3), dtype=np.uint8)
-    
-    return MockResult([box1, box2], mock_orig_img)
-
-
 # ---------------------------------------------------------------------------
 # Casos de Test TDD
 # ---------------------------------------------------------------------------
 
 @patch("requests.get")
-@patch("app.ml.predictor.get_model")
+@patch("app.api.routes.predict.predict_leukocytes")
 def test_predict_anonymous_success(
-    mock_get_model, mock_requests_get, client: TestClient, 
+    mock_predict, mock_requests_get, client: TestClient, 
     mock_valid_image_bytes, seed_classes, db_session: Session
 ) -> None:
     """
@@ -128,10 +101,13 @@ def test_predict_anonymous_success(
     mock_response.content = mock_valid_image_bytes
     mock_requests_get.return_value = mock_response
     
-    # Mock del modelo YOLO
-    mock_yolo_instance = MagicMock()
-    mock_yolo_instance.return_value = [get_mock_yolo_predictions()]
-    mock_get_model.return_value = mock_yolo_instance
+    # Mock de la inferencia
+    import numpy as np
+    mock_orig_img = np.zeros((480, 640, 3), dtype=np.uint8)
+    mock_predict.return_value = (mock_orig_img, [
+        {"class_id": 6, "class_name": "Neutrófilo", "confidence": 0.94, "bbox": [10.5, 20.0, 110.5, 120.0]},
+        {"class_id": 4, "class_name": "Linfocito", "confidence": 0.89, "bbox": [200.0, 150.5, 300.0, 250.5]}
+    ])
     
     payload = {"image_url": CLOUDINARY_URL}
     
@@ -167,12 +143,12 @@ def test_predict_anonymous_success(
     # Verificar aislamiento de base de datos
     assert db_session.query(Analisis).count() == 0
     assert db_session.query(Deteccion).count() == 0
-
-
+ 
+ 
 @patch("requests.get")
-@patch("app.ml.predictor.get_model")
+@patch("app.api.routes.predict.predict_leukocytes")
 def test_predict_authenticated_success(
-    mock_get_model, mock_requests_get, client: TestClient, 
+    mock_predict, mock_requests_get, client: TestClient, 
     auth_headers: dict, mock_valid_image_bytes, seed_classes, db_session: Session
 ) -> None:
     """
@@ -188,9 +164,13 @@ def test_predict_authenticated_success(
     mock_response.content = mock_valid_image_bytes
     mock_requests_get.return_value = mock_response
     
-    mock_yolo_instance = MagicMock()
-    mock_yolo_instance.return_value = [get_mock_yolo_predictions()]
-    mock_get_model.return_value = mock_yolo_instance
+    # Mock de la inferencia
+    import numpy as np
+    mock_orig_img = np.zeros((480, 640, 3), dtype=np.uint8)
+    mock_predict.return_value = (mock_orig_img, [
+        {"class_id": 6, "class_name": "Neutrófilo", "confidence": 0.94, "bbox": [10.5, 20.0, 110.5, 120.0]},
+        {"class_id": 4, "class_name": "Linfocito", "confidence": 0.89, "bbox": [200.0, 150.5, 300.0, 250.5]}
+    ])
     
     payload = {"image_url": CLOUDINARY_URL}
     
@@ -220,8 +200,8 @@ def test_predict_authenticated_success(
     json_ids = {uuid.UUID(d["id"]) for d in data["detecciones"]}
     db_ids = {d.id for d in db_detecciones}
     assert json_ids == db_ids
-
-
+ 
+ 
 def test_predict_invalid_token(client: TestClient) -> None:
     """
     DADO un token JWT inválido,
@@ -235,8 +215,8 @@ def test_predict_invalid_token(client: TestClient) -> None:
     
     assert response.status_code == 401
     assert "detail" in response.json()
-
-
+ 
+ 
 @patch("requests.get")
 def test_predict_invalid_url_download_failure(
     mock_requests_get, client: TestClient
@@ -257,8 +237,8 @@ def test_predict_invalid_url_download_failure(
     
     assert response.status_code == 400
     assert "No se pudo descargar" in response.json()["detail"]
-
-
+ 
+ 
 @patch("requests.get")
 def test_predict_corrupt_image_format(
     mock_requests_get, client: TestClient
@@ -280,12 +260,12 @@ def test_predict_corrupt_image_format(
     
     assert response.status_code == 400
     assert "corrupto" in response.json()["detail"].lower()
-
-
+ 
+ 
 @patch("requests.get")
-@patch("app.ml.predictor.get_model")
+@patch("app.api.routes.predict.predict_leukocytes")
 def test_predict_yolo_internal_error(
-    mock_get_model, mock_requests_get, client: TestClient, 
+    mock_predict, mock_requests_get, client: TestClient, 
     mock_valid_image_bytes, seed_classes
 ) -> None:
     """
@@ -300,9 +280,7 @@ def test_predict_yolo_internal_error(
     mock_requests_get.return_value = mock_response
     
     # Simular una excepción en la ejecución del modelo YOLO
-    mock_yolo_instance = MagicMock()
-    mock_yolo_instance.side_effect = RuntimeError("YOLO GPU Out of Memory o similar")
-    mock_get_model.return_value = mock_yolo_instance
+    mock_predict.side_effect = RuntimeError("ONNX Runtime internal error")
     
     payload = {"image_url": CLOUDINARY_URL}
     
@@ -310,3 +288,4 @@ def test_predict_yolo_internal_error(
     
     assert response.status_code == 500
     assert "error interno" in response.json()["detail"].lower()
+
