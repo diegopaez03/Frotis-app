@@ -1,13 +1,12 @@
 /**
  * utils/tokenStorage.ts
  * ---------------------
- * Gestión segura del JWT en el cliente.
+ * Gestión segura del JWT en el cliente mediante cookies persistentes.
  *
  * Estrategia de seguridad:
- *   - Se persiste en sessionStorage (expira al cerrar pestaña)
+ *   - Se persiste en cookies con Max-Age de 2 semanas (14 días)
  *   - Validación de formato JWT antes de almacenar
  *   - Decodificación del payload para verificar expiración
- *   - NUNCA se almacena en localStorage ni cookies sin HttpOnly
  */
 
 // ---------------------------------------------------------------------------
@@ -38,8 +37,29 @@ interface JwtPayload {
 }
 
 // ---------------------------------------------------------------------------
-// Helpers privados
+// Helpers privados de Cookies
 // ---------------------------------------------------------------------------
+
+function setCookie(name: string, value: string, days: number): void {
+  const maxAge = days * 24 * 60 * 60;
+  // Almacenar cookie con max-age de 2 semanas (14 días) y path raíz
+  document.cookie = `${name}=${encodeURIComponent(value)}; max-age=${maxAge}; path=/; samesite=lax`;
+}
+
+function getCookie(name: string): string | null {
+  const nameEQ = name + '=';
+  const ca = document.cookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+    if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length, c.length));
+  }
+  return null;
+}
+
+function eraseCookie(name: string): void {
+  document.cookie = `${name}=; max-age=0; path=/; samesite=lax`;
+}
 
 function isValidJwtFormat(token: string): boolean {
   return typeof token === 'string' && JWT_FORMAT.test(token.trim());
@@ -68,27 +88,17 @@ export const tokenStorage = {
       console.warn('[tokenStorage] Formato JWT inválido. Token no almacenado.');
       return;
     }
-    try {
-      sessionStorage.setItem(TOKEN_KEY, token.trim());
-    } catch (e) {
-      console.warn('[tokenStorage] sessionStorage no disponible:', (e as Error).message);
-    }
+    setCookie(TOKEN_KEY, token.trim(), 14); // 2 semanas (14 días)
   },
 
   getToken(): string | null {
-    try {
-      const token = sessionStorage.getItem(TOKEN_KEY);
-      if (!token || !isValidJwtFormat(token)) return null;
-      return token;
-    } catch {
-      return null;
-    }
+    const token = getCookie(TOKEN_KEY);
+    if (!token || !isValidJwtFormat(token)) return null;
+    return token;
   },
 
   removeToken(): void {
-    try {
-      sessionStorage.removeItem(TOKEN_KEY);
-    } catch { /* no-op */ }
+    eraseCookie(TOKEN_KEY);
   },
 
   hasValidToken(): boolean {
@@ -121,13 +131,13 @@ export const userStorage = {
         email:         user.email,
         fechaCreacion: user.fechaCreacion,
       };
-      sessionStorage.setItem(USER_KEY, JSON.stringify(safeUser));
+      setCookie(USER_KEY, JSON.stringify(safeUser), 14); // 2 semanas (14 días)
     } catch { /* no-op */ }
   },
 
   getUser(): StoredUser | null {
     try {
-      const raw = sessionStorage.getItem(USER_KEY);
+      const raw = getCookie(USER_KEY);
       return raw ? (JSON.parse(raw) as StoredUser) : null;
     } catch {
       return null;
@@ -135,9 +145,7 @@ export const userStorage = {
   },
 
   removeUser(): void {
-    try {
-      sessionStorage.removeItem(USER_KEY);
-    } catch { /* no-op */ }
+    eraseCookie(USER_KEY);
   },
 };
 

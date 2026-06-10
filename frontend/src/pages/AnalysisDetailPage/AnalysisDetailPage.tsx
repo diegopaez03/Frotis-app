@@ -12,6 +12,7 @@ import ImageViewer  from '../../components/ImageViewer/ImageViewer';
 import ResultsPanel from '../../components/ResultsPanel/ResultsPanel';
 import FeedbackPanel from '../../components/FeedbackPanel/FeedbackPanel';
 import { analysisAPI } from '../../services/api';
+import { useToast } from '../../contexts/ToastContext';
 import type {
   AnalysisListItem,
   PredictResponse,
@@ -54,12 +55,17 @@ function formatDate(iso: string): string {
 export default function AnalysisDetailPage() {
   const { id }   = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [analysis,   setAnalysis]   = useState<AnalysisListItem | null>(null);
   const [prediction, setPrediction] = useState<PredictResponse  | null>(null);
   const [isLoading,  setIsLoading]  = useState(true);
   const [loadError,  setLoadError]  = useState<string | null>(null);
   const [showBboxes, setShowBboxes] = useState(true);
+
+  // Deletion states
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Feedback states
   const [isFeedbackMode, setIsFeedbackMode] = useState(false);
@@ -246,6 +252,22 @@ export default function AnalysisDetailPage() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!id) return;
+    setIsDeleting(true);
+    try {
+      await analysisAPI.delete(id);
+      showToast('success', 'Éxito', 'Análisis eliminado correctamente.');
+      setShowDeleteModal(false);
+      void navigate('/dashboard');
+    } catch (err) {
+      const msg = (err as Partial<ApiError>).message ?? 'Error al eliminar el análisis.';
+      showToast('error', 'Error al eliminar', msg);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   // ------------------------------------------------------------------
   // Vista principal
   // ------------------------------------------------------------------
@@ -287,6 +309,17 @@ export default function AnalysisDetailPage() {
               aria-label="Corregir predicciones del análisis"
             >
               ✎ Corregir análisis
+            </button>
+          )}
+
+          {!isFeedbackMode && (
+            <button
+              id="detail-delete-btn"
+              className="btn btn-danger btn-sm"
+              onClick={() => setShowDeleteModal(true)}
+              aria-label="Eliminar análisis"
+            >
+              🗑️ Eliminar
             </button>
           )}
 
@@ -472,6 +505,40 @@ export default function AnalysisDetailPage() {
                 onClick={handleSaveNewDeteccion}
               >
                 Agregar célula
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Confirmación de eliminación */}
+      {showDeleteModal && (
+        <div className="detail-modal-overlay" onClick={() => setShowDeleteModal(false)} id="delete-modal-overlay">
+          <div className="detail-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="detail-modal-header">
+              <h3 className="detail-modal-title">Eliminar Análisis</h3>
+            </div>
+            <div className="detail-modal-body">
+              <p className="detail-modal-info">
+                ¿Estás seguro de que deseas eliminar este análisis? Esta acción no se puede deshacer y lo ocultará de tu historial.
+              </p>
+            </div>
+            <div className="detail-modal-footer">
+              <button
+                id="delete-modal-cancel-btn"
+                className="btn btn-ghost btn-sm"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={isDeleting}
+              >
+                Cancelar
+              </button>
+              <button
+                id="delete-modal-confirm-btn"
+                className="btn btn-danger btn-sm"
+                onClick={handleDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Eliminando...' : 'Confirmar Eliminación'}
               </button>
             </div>
           </div>

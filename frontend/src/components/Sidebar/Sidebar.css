@@ -159,3 +159,44 @@
 .sidebar-logout-btn:hover {
   color: var(--color-error);
 }
+
+/* Close button (hidden on desktop) */
+.sidebar-close-btn {
+  display: none;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform var(--transition);
+    z-index: var(--z-modal);
+  }
+
+  .sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: var(--space-4);
+    right: var(--space-4);
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+  }
+
+  .sidebar-close-btn:hover {
+    background-color: var(--color-bg-subtle);
+    color: var(--color-text);
+  }
+}

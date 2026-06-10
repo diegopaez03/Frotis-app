@@ -406,3 +406,90 @@ def test_get_analysis_detail_soft_delete(
     
     assert response.status_code == 404
 
+
+# ---------------------------------------------------------------------------
+# Tests para DELETE /analysis/{analysis_id} (Baja lógica de análisis)
+# ---------------------------------------------------------------------------
+
+def test_delete_analysis_success(
+    client: TestClient, 
+    auth_headers_user_a: dict, 
+    db_session: Session
+) -> None:
+    """
+    DADO un usuario autenticado y un análisis propio y activo,
+    CUANDO solicita DELETE /analysis/{analysis_id},
+    ENTONCES se retorna HTTP 200 con un mensaje de éxito,
+    Y el análisis se marca con fechaBaja (baja lógica) en la base de datos.
+    """
+    user_a = db_session.query(Usuario).filter(Usuario.email == EMAIL_USER_A).one()
+
+    analisis = Analisis(usuario_id=user_a.id, imagen_url="http://cloudinary.com/frotis_delete.jpg", estado="COMPLETED")
+    db_session.add(analisis)
+    db_session.commit()
+
+    url = f"/analysis/{analisis.id}"
+    response = client.delete(url, headers=auth_headers_user_a)
+    
+    assert response.status_code == 200
+    assert "eliminado" in response.json()["message"].lower()
+
+    # Verificar baja lógica en BD
+    db_session.expire_all()
+    db_analisis = db_session.query(Analisis).filter(Analisis.id == analisis.id).one()
+    assert db_analisis.fechaBaja is not None
+
+
+def test_delete_analysis_not_found(client: TestClient, auth_headers_user_a: dict) -> None:
+    """
+    DADO un ID de análisis inexistente,
+    CUANDO solicita DELETE /analysis/{analysis_id},
+    ENTONCES se retorna HTTP 404 Not Found.
+    """
+    random_uuid = uuid.uuid4()
+    response = client.delete(f"/analysis/{random_uuid}", headers=auth_headers_user_a)
+    assert response.status_code == 404
+    assert "no encontrado" in response.json()["detail"].lower()
+
+
+def test_delete_analysis_unauthorized(client: TestClient) -> None:
+    """
+    DADO una petición sin token válido,
+    CUANDO solicita DELETE /analysis/{analysis_id},
+    ENTONCES se retorna HTTP 401 Unauthorized.
+    """
+    random_uuid = uuid.uuid4()
+    response = client.delete(f"/analysis/{random_uuid}")
+    assert response.status_code == 401
+
+
+def test_delete_analysis_isolation(
+    client: TestClient, 
+    auth_headers_user_a: dict, 
+    auth_headers_user_b: dict, 
+    db_session: Session
+) -> None:
+    """
+    DADO el análisis del Usuario A,
+    CUANDO el Usuario B intenta darlo de baja mediante DELETE /analysis/{analysis_id},
+    ENTONCES se retorna HTTP 404 Not Found,
+    Y el análisis del Usuario A permanece activo (fechaBaja es NULL).
+    """
+    user_a = db_session.query(Usuario).filter(Usuario.email == EMAIL_USER_A).one()
+
+    analisis_a = Analisis(usuario_id=user_a.id, imagen_url="http://cloudinary.com/privado_del.jpg", estado="COMPLETED")
+    db_session.add(analisis_a)
+    db_session.commit()
+
+    # Usuario B intenta eliminar análisis del Usuario A
+    url = f"/analysis/{analisis_a.id}"
+    response = client.delete(url, headers=auth_headers_user_b)
+    
+    assert response.status_code == 404
+
+    # Verificar que el análisis de A siga activo en la BD
+    db_session.expire_all()
+    db_analisis_a = db_session.query(Analisis).filter(Analisis.id == analisis_a.id).one()
+    assert db_analisis_a.fechaBaja is None
+
+

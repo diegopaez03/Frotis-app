@@ -31,7 +31,12 @@ const NAV_ITEMS: NavItem[] = [
   },
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const { user, logout } = useAuth();
   const { showToast }    = useToast();
   const navigate         = useNavigate();
@@ -39,6 +44,7 @@ export default function Sidebar() {
   function handleLogout(): void {
     logout();
     showToast('info', 'Sesión cerrada', 'Has cerrado sesión correctamente.');
+    if (onClose) onClose();
     void navigate('/login');
   }
 
@@ -47,7 +53,15 @@ export default function Sidebar() {
     : '??';
 
   return (
-    <aside className="sidebar" role="navigation" aria-label="Navegación principal">
+    <aside className={`sidebar${isOpen ? ' is-open' : ''}`} role="navigation" aria-label="Navegación principal">
+      {/* Close button for mobile */}
+      <button
+        className="sidebar-close-btn"
+        onClick={onClose}
+        aria-label="Cerrar menú de navegación"
+      >
+        ✕
+      </button>
       {/* Logo */}
       <div className="sidebar-logo" aria-label="Frotis AI">
         <div className="sidebar-logo-icon" aria-hidden="true">
@@ -70,6 +84,7 @@ export default function Sidebar() {
             key={to}
             to={to}
             title={title}
+            onClick={onClose}
             className={({ isActive }) =>
               `sidebar-link${isActive ? ' sidebar-link-active' : ''}`
             }

@@ -109,7 +109,15 @@ if _STATIC_DIR.exists():
 
     # Catch-all: devolver index.html para que React Router maneje la navegación.
     # DEBE ir al final, después de todos los routers de la API.
+    # Si el recurso solicitado existe físicamente en _STATIC_DIR, se devuelve dicho archivo.
     @app.get("/{full_path:path}", include_in_schema=False)
     async def serve_spa(full_path: str) -> FileResponse:
-        """Sirve el index.html del frontend para todas las rutas no capturadas por la API."""
+        """Sirve el index.html del frontend para todas las rutas no capturadas por la API o archivos estáticos."""
+        try:
+            resolved_path = (_STATIC_DIR / full_path).resolve()
+            # Validar que el archivo exista y no escape de la carpeta static (Directory Traversal)
+            if resolved_path.is_file() and resolved_path.relative_to(_STATIC_DIR.resolve()):
+                return FileResponse(str(resolved_path))
+        except (ValueError, RuntimeError):
+            pass
         return FileResponse(str(_STATIC_DIR / "index.html"))

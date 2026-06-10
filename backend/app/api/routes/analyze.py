@@ -310,3 +310,53 @@ def save_analysis_feedback(
         )
 
     return {"status": "ok", "message": "Feedback registrado correctamente."}
+
+
+@router.delete(
+    "/analysis/{analysis_id}",
+    status_code=status.HTTP_200_OK,
+    summary="Dar de baja lógica un análisis",
+    description=(
+        "Permite al usuario eliminar lógicamente un análisis propio del sistema. "
+        "El análisis se marcará con fechaBaja (baja lógica), impidiendo que figure "
+        "en listados o consultas de detalle subsiguientes."
+    ),
+)
+def delete_user_analysis(
+    analysis_id: uuid.UUID,
+    db: DbSession,
+    current_user: Usuario = Depends(get_current_user)
+):
+    """
+    Aplica baja lógica a un análisis si el usuario actual es su propietario y no ha sido dado de baja previamente.
+    """
+    # 1. Buscar el análisis activo y que pertenezca al usuario
+    analysis = (
+        db.query(Analisis)
+        .filter(
+            Analisis.id == analysis_id,
+            Analisis.usuario_id == current_user.id,
+            Analisis.fechaBaja.is_(None)
+        )
+        .first()
+    )
+
+    if not analysis:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Análisis no encontrado o acceso no autorizado."
+        )
+
+    try:
+        # 2. Aplicar baja lógica (establecer fechaBaja con datetime actual)
+        analysis.fechaBaja = datetime.now(timezone.utc)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al dar de baja el análisis en la base de datos: {str(e)}"
+        )
+
+    return {"status": "ok", "message": "Análisis eliminado correctamente."}
+

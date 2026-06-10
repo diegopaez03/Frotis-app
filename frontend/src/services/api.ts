@@ -254,6 +254,12 @@ export const analysisAPI = {
       apiClient.post<FeedbackResponse>(`/analysis/${analysisId}/feedback`, payload).then((r) => r.data)
     );
   },
+
+  delete(analysisId: string): Promise<{ status: string; message: string }> {
+    return withRetry(() =>
+      apiClient.delete<{ status: string; message: string }>(`/analysis/${analysisId}`).then((r) => r.data)
+    );
+  },
 };
 
 export default apiClient;
