@@ -38,13 +38,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# --- CAPA 1: torch + torchvision CPU-only ---
-# Casi nunca cambia → queda cacheada en Heroku
-COPY backend/requirements-heavy.txt .
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir \
-        --index-url https://download.pytorch.org/whl/cpu \
-        -r requirements-heavy.txt
+# --- CAPA 1: Actualización de pip ---
+RUN pip install --no-cache-dir --upgrade pip
 
 # --- CAPA 2: Resto de dependencias Python ---
 # Solo se reconstruye si cambia requirements.txt

@@ -2,3 +2,7 @@ build:
   docker:
     # Dockerfile en la raíz: multi-stage (Node buildea frontend + Python corre backend)
     web: Dockerfile
+release:
+  image: web
+  command:
+    - alembic upgrade head
